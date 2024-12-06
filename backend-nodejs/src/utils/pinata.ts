@@ -7,27 +7,22 @@ dotenv.config();
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY!;
 const PINATA_API_SECRET = process.env.PINATA_API_SECRET!;
-const PINATA_BASE_CID = process.env.PINATA_BASE_CID!; // CID della directory esistente
+const PINATA_BASE_CID = process.env.PINATA_BASE_CID!;
 
 if (!PINATA_API_KEY || !PINATA_API_SECRET || !PINATA_BASE_CID) {
-  throw new Error(
-    "Le chiavi API di Pinata o il CID base sono mancanti nel file .env"
-  );
+  throw new Error("Pinata API keys or base CID are missing in the .env file.");
 }
 
-// Funzione per caricare un file JSON nella directory esistente su Pinata
 export const uploadFileToExistingCid = async (
   fileName: string,
   metadata: Record<string, any>
 ): Promise<string> => {
   try {
-    // Salva temporaneamente il file JSON
     const filePath = path.join(__dirname, `${fileName}.json`);
     fs.writeFileSync(filePath, JSON.stringify(metadata, null, 2));
 
     const fileStream = fs.createReadStream(filePath);
 
-    // Carica il file nella directory esistente su Pinata
     const response = await axios.post(
       "https://api.pinata.cloud/pinning/pinFileToIPFS",
       fileStream,
@@ -51,15 +46,14 @@ export const uploadFileToExistingCid = async (
       }
     );
 
-    // Elimina il file temporaneo dopo il caricamento
     fs.unlinkSync(filePath);
 
     console.log(
-      `File caricato con successo nella directory esistente su Pinata: ${response.data.IpfsHash}`
+      `File successfully uploaded to existing directory on Pinata: ${response.data.IpfsHash}`
     );
-    return response.data.IpfsHash; // Ritorna il CID del file aggiornato
+    return response.data.IpfsHash;
   } catch (error) {
-    console.error("Errore durante il caricamento del file su Pinata:", error);
+    console.error("Error while uploading file to Pinata:", error);
     throw error;
   }
 };
