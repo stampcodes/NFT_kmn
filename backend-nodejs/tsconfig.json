@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2016", // Versione ECMAScript
+    "module": "commonjs", // Usato in Node.js
+    "rootDir": "./src", // Directory sorgente
+    "outDir": "./dist", // Directory per i file compilati
+    "strict": true, // Abilita i controlli di tipo più severi
+    "esModuleInterop": true, // Per compatibilità con CommonJS
+    "forceConsistentCasingInFileNames": true, // Impone la coerenza nei nomi dei file
+    "skipLibCheck": true, // Salta il controllo delle definizioni di tipo
+    "resolveJsonModule": true // Abilita la risoluzione dei moduli JSON
+  },
+  "include": ["src/**/*"], // Include tutti i file nella directory src
+  "exclude": ["node_modules"] // Esclude node_modules
+}
