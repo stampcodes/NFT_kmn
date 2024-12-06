@@ -131,12 +131,22 @@ contract ExcKatametronNFT is ERC721, Ownable {
     function setBaseURI(string memory newBaseURI) public onlyOwner {
         baseURI = newBaseURI;
 
-        // Aggiorna tutte le URI dei token già mintati
         for (uint256 i = 1; i <= _tokenIdCounter; i++) {
             _tokenURIs[i] = string(
                 abi.encodePacked(baseURI, Strings.toString(i), ".json")
             );
         }
+    }
+
+    function setTokenURI(
+        uint256 tokenId,
+        string memory newTokenURI
+    ) public onlyOwner {
+        require(
+            ownerOf(tokenId) != address(0),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        _tokenURIs[tokenId] = newTokenURI;
     }
 
     function totalSupply() external view returns (uint256) {
