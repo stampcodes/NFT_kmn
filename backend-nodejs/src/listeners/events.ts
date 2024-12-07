@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 import dotenv from "dotenv";
 import contractAbi from "../abi/ExcKatametronNFT.json";
-import { uploadFileToExistingCid } from "../utils/pinata";
-// import { updateTokenURI } from "../services/tokenURI";
+import { uploadFileToNewCid } from "../utils/pinata";
+import { updateTokenURI } from "../services/tokenURI";
 import axios from "axios";
 
 dotenv.config();
@@ -19,18 +19,25 @@ const fetchMetadataFromIPFS = async (
   cid: string,
   tokenId: bigint
 ): Promise<Record<string, any>> => {
-  const fileName = `${tokenId}.json`;
+  if (!cid) {
+    throw new Error(
+      "PREVIOUS_CID is undefined or empty. Check your .env file."
+    );
+  }
+
+  const fileName = `${tokenId}.json`; // Nome file basato sul tokenId
   const url = `https://gateway.pinata.cloud/ipfs/${cid}/${fileName}`;
   console.log(`Fetching metadata from: ${url}`);
 
   try {
     const response = await axios.get(url, { timeout: 10000 });
+    console.log("Metadata fetched successfully:", response.data);
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`Error fetching metadata from ${url}:`, error.message);
+      console.error(`Error fetching metadata from ${url}: ${error.message}`);
     } else {
-      console.error(`Unknown error fetching metadata from ${url}:`, error);
+      console.error(`Unexpected error: ${JSON.stringify(error)}`);
     }
     throw error;
   }
@@ -41,10 +48,8 @@ export const startListening = () => {
     console.log(`NFT name updated! Token ID: ${tokenId}, New Name: ${newName}`);
 
     try {
-      const existingCid = process.env.PINATA_BASE_CID!;
-      const fileName = `${newName}.json`;
-
-      const metadata = await fetchMetadataFromIPFS(existingCid, tokenId);
+      const existingCid = process.env.PREVIOUS_CID!;
+      const metadata = await fetchMetadataFromIPFS(existingCid, tokenId); // Passa il tokenId
 
       console.log("Existing metadata:", metadata);
 
@@ -52,17 +57,15 @@ export const startListening = () => {
 
       console.log("Updated metadata:", metadata);
 
-      const updatedFileCid = await uploadFileToExistingCid(fileName, metadata);
+      const newCid = await uploadFileToNewCid(`${newName}.json`, metadata);
 
-      console.log(
-        `File updated in existing directory with CID: ${updatedFileCid}`
-      );
+      console.log(`New CID generated: ${newCid}`);
 
-      const newUri = `ipfs://${existingCid}/${fileName}`;
-      // const txHash = await updateTokenURI(tokenId, newUri);
+      const newUri = `ipfs://${newCid}`;
+      const txHash = await updateTokenURI(tokenId, newUri);
 
       console.log(`Token URI updated on blockchain: ${newUri}`);
-      // console.log(`Transaction confirmed. Transaction Hash: ${txHash}`);
+      console.log(`Transaction confirmed. Transaction Hash: ${txHash}`);
     } catch (error) {
       console.error("Error handling NFTNameUpdated event:", error);
     }
