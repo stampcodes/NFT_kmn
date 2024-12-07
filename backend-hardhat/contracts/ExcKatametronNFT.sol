@@ -112,11 +112,6 @@ contract ExcKatametronNFT is ERC721, Ownable {
             "ERC721Metadata: URI query for nonexistent token"
         );
 
-        string memory customName = customNames[tokenId];
-        if (bytes(customName).length > 0) {
-            return string(abi.encodePacked(baseURI, customName, ".json"));
-        }
-
         return _tokenURIs[tokenId];
     }
 
