@@ -1,0 +1,27 @@
+
+node_modules
+.env
+
+# gitignore Backend-hardhat
+
+
+# Hardhat files
+backend-hardhat/cache
+backend-hardhat/artifacts
+
+# TypeChain files
+backend-hardhat/typechain
+backend-hardhat/typechain-types
+
+# solidity-coverage files
+backend-hardhat/coverage
+backend-hardhat/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+backend-hardhat/ignition/deployments
+
+
+
+#gitignore Backend-nodejs
+
+backend-nodejs/dist
