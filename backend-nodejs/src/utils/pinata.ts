@@ -2,18 +2,18 @@ import axios from "axios";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import FormData from "form-data";
 
 dotenv.config();
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY!;
 const PINATA_API_SECRET = process.env.PINATA_API_SECRET!;
-const PINATA_BASE_CID = process.env.PINATA_BASE_CID!;
 
-if (!PINATA_API_KEY || !PINATA_API_SECRET || !PINATA_BASE_CID) {
-  throw new Error("Pinata API keys or base CID are missing in the .env file.");
+if (!PINATA_API_KEY || !PINATA_API_SECRET) {
+  throw new Error("Pinata API keys are missing in the .env file.");
 }
 
-export const uploadFileToExistingCid = async (
+export const uploadFileToNewCid = async (
   fileName: string,
   metadata: Record<string, any>
 ): Promise<string> => {
@@ -21,27 +21,17 @@ export const uploadFileToExistingCid = async (
     const filePath = path.join(__dirname, `${fileName}.json`);
     fs.writeFileSync(filePath, JSON.stringify(metadata, null, 2));
 
-    const fileStream = fs.createReadStream(filePath);
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(filePath));
 
     const response = await axios.post(
       "https://api.pinata.cloud/pinning/pinFileToIPFS",
-      fileStream,
+      formData,
       {
         headers: {
           pinata_api_key: PINATA_API_KEY,
           pinata_secret_api_key: PINATA_API_SECRET,
-          "Content-Type": "multipart/form-data",
-        },
-        params: {
-          pinataMetadata: JSON.stringify({
-            name: fileName,
-            keyvalues: {
-              parentCID: PINATA_BASE_CID,
-            },
-          }),
-          pinataOptions: JSON.stringify({
-            cidVersion: 1,
-          }),
+          ...formData.getHeaders(),
         },
       }
     );
@@ -49,7 +39,7 @@ export const uploadFileToExistingCid = async (
     fs.unlinkSync(filePath);
 
     console.log(
-      `File successfully uploaded to existing directory on Pinata: ${response.data.IpfsHash}`
+      `File successfully uploaded to Pinata: ${response.data.IpfsHash}`
     );
     return response.data.IpfsHash;
   } catch (error) {
