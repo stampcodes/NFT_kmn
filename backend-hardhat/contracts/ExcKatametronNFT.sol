@@ -19,6 +19,13 @@ contract ExcKatametronNFT is ERC721, Ownable {
 
     mapping(uint256 => string) public customNames;
     mapping(uint256 => string) private _tokenURIs;
+    struct NFTDetails {
+        uint256 tokenId;
+        string name;
+        string uri;
+        address owner;
+        bool hasCustomName;
+    }
 
     constructor(
         string memory _baseURI,
@@ -83,6 +90,35 @@ contract ExcKatametronNFT is ERC721, Ownable {
         hasCustomName = bytes(name).length > 0;
         uri = tokenURI(tokenId);
         owner = ownerOf(tokenId);
+    }
+
+    function getDetailsForOwner(
+        address owner
+    ) external view returns (NFTDetails[] memory) {
+        uint256 totalTokens = _tokenIdCounter;
+        uint256 balance = balanceOf(owner);
+        NFTDetails[] memory details = new NFTDetails[](balance);
+        uint256 index = 0;
+
+        for (uint256 tokenId = 1; tokenId <= totalTokens; tokenId++) {
+            if (ownerOf(tokenId) == owner) {
+                string memory name = customNames[tokenId];
+                bool hasCustomName = bytes(name).length > 0;
+                string memory uri = tokenURI(tokenId);
+
+                details[index] = NFTDetails({
+                    tokenId: tokenId,
+                    name: name,
+                    uri: uri,
+                    owner: owner,
+                    hasCustomName: hasCustomName
+                });
+
+                index++;
+            }
+        }
+
+        return details;
     }
 
     function calculateCost(uint256 quantity) public view returns (uint256) {
