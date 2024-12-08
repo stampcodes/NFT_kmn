@@ -45,7 +45,7 @@ The KMN project is a comprehensive application for managing NFTs (Non-Fungible T
 - Clone the repository:
 
 ```bash
-git clone https://github.com/stampcodes/test_kmn.git
+git clone https://github.com/stampcodes/NFT_kmn.git
 ```
 
 ### Backend Setup
