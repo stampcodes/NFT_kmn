@@ -95,7 +95,7 @@ yarn dev
 yarn
 ```
 
-3. Create a `.env` file in the root of the backend project and add the following variables:
+3. Create a `.env` file in the root of the frontend project and add the following variables:
 
 ```plaintext
 VITE_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
